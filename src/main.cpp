@@ -131,7 +131,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
 
   // Desklamp
-  if (strcmp(topic,"home/bedroom/switch4")==0){
+  if (strcmp(topic,"home/office/desklamp")==0){
 
     for (int i=0;i<length;i++) {
      receivedString += (char)payload[i];
@@ -160,9 +160,9 @@ void reconnect() {
   // ... and subscribe to topic
   client.subscribe("home/bedroom/bookshelf/switch");
   client.subscribe("home/bedroom/bookshelf/brightness");
-  client.subscribe("home/bedroom/switch3");
-  client.subscribe("home/bedroom/switch4");
-  client.subscribe("home/bedroom/lamp1");
+  client.subscribe("home/livingroom/tree");
+  client.subscribe("home/livingroom/fountain");
+  client.subscribe("home/office/desklamp");
   
  } else {
   Serial.print("failed, rc=");
