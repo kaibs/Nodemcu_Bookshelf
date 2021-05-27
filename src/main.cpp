@@ -130,6 +130,23 @@ void callback(char* topic, byte* payload, unsigned int length) {
     receivedString = "";
   }
 
+  // Speaker III-1
+  if (strcmp(topic,"home/livingroom/speaker")==0){
+
+    for (int i=0;i<length;i++) {
+     receivedString += (char)payload[i];
+
+     if (receivedString == "ON"){
+      sendSignal("FF0F0FFFFFFF");
+     }
+
+     if (receivedString == "OFF"){
+      sendSignal("FF0F0FFF0000");
+     }
+    }
+    receivedString = "";
+  }
+
   // Desklamp
   if (strcmp(topic,"home/office/desklamp")==0){
 
@@ -162,6 +179,7 @@ void reconnect() {
   client.subscribe("home/bedroom/bookshelf/brightness");
   client.subscribe("home/livingroom/tree");
   client.subscribe("home/livingroom/fountain");
+  client.subscribe("home/livingroom/speaker");
   client.subscribe("home/office/desklamp");
   
  } else {
