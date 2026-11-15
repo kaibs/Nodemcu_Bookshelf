@@ -31,11 +31,8 @@ int brightness = 122;
 
 
 // FCNs RF-Switches
-void sendSignal(char tristate[]){
-  for (int i=0;i<repetitions;i++){
-    transmitter.sendTriState(tristate);
-    delay(10);
-  }
+void sendSignal(const char* tristate){
+  transmitter.sendTriState(tristate);
 }
 
 
@@ -46,14 +43,14 @@ void stripON(){
   String helpVal = (String)brightness;
   char feedback[10];
   helpVal.toCharArray(feedback, 10);
-  client.publish("home/bedroom/bookshelf/feedback", feedback);
+  client.publish("home/livingroom/bookshelf/feedback", feedback);
 }
 
 void stripOFF(){
   
   analogWrite(led, 0);
   char feedback[5] = "0";
-  client.publish("home/bedroom/bookshelf/feedback", feedback);
+  client.publish("home/livingroom/bookshelf/feedback", feedback);
 }
 
 void setBright(){
@@ -62,13 +59,13 @@ void setBright(){
   String helpVal = (String)brightness;
   char feedback[10];
   helpVal.toCharArray(feedback, 10);
-  client.publish("home/bedroom/bookshelf/feedback", feedback);
+  client.publish("home/livingroom/bookshelf/feedback", feedback);
 }
 
 // Callback MQTT
 void callback(char* topic, byte* payload, unsigned int length) {
  
- if (strcmp(topic,"home/bedroom/bookshelf/switch")==0){
+ if (strcmp(topic,"home/livingroom/bookshelf/switch")==0){
   for (int i=0;i<length;i++) {
    receivedString += (char)payload[i];
 
@@ -84,7 +81,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   receivedString = "";
  }
 
- if (strcmp(topic,"home/bedroom/bookshelf/brightness")==0){
+ if (strcmp(topic,"home/livingroom/bookshelf/brightness")==0){
  
   for (int i=0;i<length;i++) {
    receivedString += (char)payload[i];
@@ -146,23 +143,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     receivedString = "";
   }
-
-  // Desklamp
-  if (strcmp(topic,"home/office/desklamp")==0){
-
-    for (int i=0;i<length;i++) {
-     receivedString += (char)payload[i];
-
-     if (receivedString == "ON"){
-      sendSignal("0FFFFFF0FFFF");
-     }
-
-     if (receivedString == "OFF"){
-      sendSignal("0FFFFFF0FFF0");
-     }
-    }
-    receivedString = "";
-  }
  }
 
 void reconnect() {
@@ -175,12 +155,11 @@ void reconnect() {
  if (client.connect("BookshelfESP", user, passw)) {
   Serial.println("connected");
   // ... and subscribe to topic
-  client.subscribe("home/bedroom/bookshelf/switch");
-  client.subscribe("home/bedroom/bookshelf/brightness");
+  client.subscribe("home/livingroom/bookshelf/switch");
+  client.subscribe("home/livingroom/bookshelf/brightness");
   client.subscribe("home/livingroom/tree");
   client.subscribe("home/livingroom/fountain");
   client.subscribe("home/livingroom/speaker");
-  client.subscribe("home/office/desklamp");
   
  } else {
   Serial.print("failed, rc=");
@@ -203,6 +182,8 @@ void setup() {
   //Wifi
   WiFi.hostname("BookshelfESP");
   WiFi.begin(ssid, password);
+  // Keep the radio awake for responsive MQTT control.
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
   
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -218,6 +199,7 @@ void setup() {
   transmitter.enableTransmit(rfpin);
   transmitter.setProtocol(2);
   transmitter.setPulseLength(320);
+  transmitter.setRepeatTransmit(repetitions);
 
 }
 
